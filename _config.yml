@@ -1,0 +1,6 @@
+title: Render Protocol
+description: Render Protocol is an open-source, server-driven UI framework for modern mobile platforms!
+
+remote_theme: pages-themes/architect@v0.2.0
+plugins:
+- jekyll-remote-theme
