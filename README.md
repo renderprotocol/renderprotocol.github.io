@@ -140,7 +140,7 @@ This enables:
 
 ## 🔗 Learn More
 
-- GitHub Org: https://github.com/renderprotocol
+- GitHub Org: [https://github.com/renderprotocol](https://github.com/renderprotocol)
 
 ---
 
