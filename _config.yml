@@ -1,6 +1,6 @@
 title: Render Protocol
 description: Render Protocol is an open-source, AI-powered, server-driven UI framework for modern mobile platforms, starting with SwiftUI and Flutter, and expanding to Jetpack Compose!
-show_downloads: false
-remote_theme: pages-themes/architect@v0.2.0
-plugins:
-- jekyll-remote-theme
+# show_downloads: false
+# remote_theme: pages-themes/architect@v0.2.0
+# plugins:
+# - jekyll-remote-theme
