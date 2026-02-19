@@ -307,7 +307,7 @@
 
         /* ─── Sections ─── */
         .section {
-            padding: 5rem 0;
+            padding: 3.5rem 0;
         }
 
         .section-header {
@@ -770,6 +770,70 @@
             text-decoration: none;
         }
 
+        /* ─── Contributors ─── */
+        .contributors {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 2rem 0;
+        }
+
+        .contributors-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .contributor {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            padding: 0.35rem 0.75rem 0.35rem 0.35rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 100px;
+            transition: all 0.25s ease;
+        }
+
+        .contributor:hover {
+            border-color: var(--border);
+            box-shadow: 0 0 16px rgba(0, 191, 165, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .contributor img {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+        }
+
+        .contributor span {
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .contributor:hover span {
+            color: var(--primary-light);
+        }
+
+        /* ─── Scrollable Table Wrapper ─── */
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 0 -0.5rem;
+            padding: 0 0.5rem;
+        }
+
+        .table-scroll .repo-table {
+            min-width: 600px;
+        }
+
         /* ─── Responsive ─── */
         @media (max-width: 768px) {
             .nav-links {
@@ -780,25 +844,87 @@
                 padding: 7rem 0 3rem;
             }
 
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 0.95rem;
+                padding: 0 0.5rem;
+            }
+
+            .hero-notice {
+                font-size: 0.78rem;
+                text-align: center;
+                padding: 0.6rem 1rem;
+                line-height: 1.6;
+            }
+
             .hero-actions {
                 flex-direction: column;
                 align-items: center;
+            }
+
+            .section {
+                padding: 3rem 0;
+            }
+
+            .section-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .section-header p {
+                font-size: 0.92rem;
+                padding: 0 0.5rem;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .principles-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .diagram-wrapper {
+                padding: 1rem;
+                border-radius: 14px;
             }
 
             .ai-grid {
                 grid-template-columns: 1fr;
             }
 
-            .diagram-wrapper {
-                padding: 1.25rem;
-            }
-
             .ai-section {
-                padding: 2rem 1.5rem;
+                padding: 2rem 1.25rem;
+                border-radius: 14px;
             }
 
             .status-grid {
                 grid-template-columns: 1fr 1fr;
+            }
+
+            .table-section-title {
+                font-size: 1rem;
+            }
+
+            .roadmap-phase h3 {
+                font-size: 1rem;
+            }
+
+            .roadmap-items li {
+                font-size: 0.83rem;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .contributors {
+                flex-direction: column;
+                gap: 0.5rem;
             }
         }
 
@@ -807,8 +933,56 @@
                 padding: 0 1rem;
             }
 
+            .hero {
+                padding: 6rem 0 2.5rem;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .hero-badge {
+                font-size: 0.72rem;
+            }
+
+            .section {
+                padding: 2.5rem 0;
+            }
+
+            .section-header {
+                margin-bottom: 2rem;
+            }
+
             .status-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .status-card {
+                padding: 1rem;
+            }
+
+            .status-card .area {
+                font-size: 0.82rem;
+            }
+
+            .card {
+                padding: 1.25rem;
+            }
+
+            .principle-item {
+                padding: 0.85rem 1rem;
+            }
+
+            .ai-section {
+                padding: 1.5rem 1rem;
+            }
+
+            .footer {
+                padding: 2rem 0;
+            }
+
+            .footer-tagline {
+                font-size: 0.95rem;
             }
         }
     </style>
@@ -1034,181 +1208,195 @@ graph TD
             <!-- Schema & Specifications -->
             <div class="table-section">
                 <div class="table-section-title">📐 Schema &amp; Specifications</div>
-                <table class="repo-table">
-                    <thead>
-                        <tr>
-                            <th>Repository</th>
-                            <th>Description</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><a href="https://github.com/renderprotocol/render-protocol-spec"
-                                    target="_blank">render-protocol-spec</a></td>
-                            <td class="desc">Canonical Protobuf schemas — UI component definitions and gRPC API service
-                                contracts. Versioned (<code>v1</code>, <code>v2</code>) with Buf-managed code generation
-                                for Swift, Dart, Kotlin, C++, JS, and Python.</td>
-                            <td><span class="status status-active">🟢 Active</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-scroll">
+                    <table class="repo-table">
+                        <thead>
+                            <tr>
+                                <th>Repository</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/renderprotocol/render-protocol-spec"
+                                        target="_blank">render-protocol-spec</a></td>
+                                <td class="desc">Canonical Protobuf schemas — UI component definitions and gRPC API
+                                    service contracts. Versioned (<code>v1</code>, <code>v2</code>) with Buf-managed
+                                    code generation for Swift, Dart, Kotlin, C++, JS, and Python.</td>
+                                <td><span class="status status-active">🟢 Active</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Client SDKs -->
             <div class="table-section">
                 <div class="table-section-title">🧩 Client SDKs</div>
-                <table class="repo-table">
-                    <thead>
-                        <tr>
-                            <th>Repository</th>
-                            <th>Platform</th>
-                            <th>Description</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><a href="https://github.com/renderprotocol/RenderProtocolSwift"
-                                    target="_blank">RenderProtocolSwift</a></td>
-                            <td>SwiftUI</td>
-                            <td class="desc">Native Swift SDK with modular architecture — includes schema rendering,
-                                networking (gRPC), caching, state management, and component registries. Ships with an
-                                example app.</td>
-                            <td><span class="status status-active">🟢 Active</span></td>
-                        </tr>
-                        <tr>
-                            <td><a href="https://github.com/renderprotocol/fl_render_protocol"
-                                    target="_blank">fl_render_protocol</a></td>
-                            <td>Flutter</td>
-                            <td class="desc">Flutter SDK mirroring the Swift architecture — widget rendering,
-                                networking, caching, and component registries. Includes an example app.</td>
-                            <td><span class="status status-active">🟢 Active</span></td>
-                        </tr>
-                        <tr>
-                            <td><a href="https://github.com/renderprotocol/render-protocol-compose"
-                                    target="_blank">render-protocol-compose</a></td>
-                            <td>Jetpack Compose</td>
-                            <td class="desc">Kotlin/Compose renderer for Android.</td>
-                            <td><span class="status status-not-started">🔴 Not Started</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-scroll">
+                    <table class="repo-table">
+                        <thead>
+                            <tr>
+                                <th>Repository</th>
+                                <th>Platform</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/renderprotocol/RenderProtocolSwift"
+                                        target="_blank">RenderProtocolSwift</a></td>
+                                <td>SwiftUI</td>
+                                <td class="desc">Native Swift SDK with modular architecture — includes schema rendering,
+                                    networking (gRPC), caching, state management, and component registries. Ships with
+                                    an example app.</td>
+                                <td><span class="status status-active">🟢 Active</span></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/renderprotocol/fl_render_protocol"
+                                        target="_blank">fl_render_protocol</a></td>
+                                <td>Flutter</td>
+                                <td class="desc">Flutter SDK mirroring the Swift architecture — widget rendering,
+                                    networking, caching, and component registries. Includes an example app.</td>
+                                <td><span class="status status-active">🟢 Active</span></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/renderprotocol/render-protocol-compose"
+                                        target="_blank">render-protocol-compose</a></td>
+                                <td>Jetpack Compose</td>
+                                <td class="desc">Kotlin/Compose renderer for Android.</td>
+                                <td><span class="status status-not-started">🔴 Not Started</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Generated Code -->
             <div class="table-section">
                 <div class="table-section-title">⚙️ Generated Code</div>
-                <table class="repo-table">
-                    <thead>
-                        <tr>
-                            <th>Repository</th>
-                            <th>Language</th>
-                            <th>Description</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><a href="https://github.com/renderprotocol/RPGeneratedSwift"
-                                    target="_blank">RPGeneratedSwift</a></td>
-                            <td>Swift</td>
-                            <td class="desc">Auto-generated Swift Protobuf &amp; gRPC stubs from
-                                <code>render-protocol-spec</code>. Consumed as a dependency by
-                                <code>RenderProtocolSwift</code>.</td>
-                            <td><span class="status status-active">🟢 Active</span></td>
-                        </tr>
-                        <tr>
-                            <td><a href="https://github.com/renderprotocol/rp_generated_dart"
-                                    target="_blank">rp_generated_dart</a></td>
-                            <td>Dart</td>
-                            <td class="desc">Auto-generated Dart Protobuf &amp; gRPC stubs from
-                                <code>render-protocol-spec</code>. Consumed by <code>fl_render_protocol</code> and
-                                <code>render_protocol_server</code>.</td>
-                            <td><span class="status status-active">🟢 Active</span></td>
-                        </tr>
-                        <tr>
-                            <td>rp-generated-kotlin</td>
-                            <td>Kotlin</td>
-                            <td class="desc">Auto-generated Kotlin Protobuf &amp; gRPC stubs for
-                                <code>render-protocol-compose</code>.</td>
-                            <td><span class="status status-planned">🟠 Planned</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-scroll">
+                    <table class="repo-table">
+                        <thead>
+                            <tr>
+                                <th>Repository</th>
+                                <th>Language</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/renderprotocol/RPGeneratedSwift"
+                                        target="_blank">RPGeneratedSwift</a></td>
+                                <td>Swift</td>
+                                <td class="desc">Auto-generated Swift Protobuf &amp; gRPC stubs from
+                                    <code>render-protocol-spec</code>. Consumed as a dependency by
+                                    <code>RenderProtocolSwift</code>.
+                                </td>
+                                <td><span class="status status-active">🟢 Active</span></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/renderprotocol/rp_generated_dart"
+                                        target="_blank">rp_generated_dart</a></td>
+                                <td>Dart</td>
+                                <td class="desc">Auto-generated Dart Protobuf &amp; gRPC stubs from
+                                    <code>render-protocol-spec</code>. Consumed by <code>fl_render_protocol</code> and
+                                    <code>render_protocol_server</code>.
+                                </td>
+                                <td><span class="status status-active">🟢 Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>rp-generated-kotlin</td>
+                                <td>Kotlin</td>
+                                <td class="desc">Auto-generated Kotlin Protobuf &amp; gRPC stubs for
+                                    <code>render-protocol-compose</code>.
+                                </td>
+                                <td><span class="status status-planned">🟠 Planned</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Shared Utilities -->
             <div class="table-section">
                 <div class="table-section-title">🧰 Shared Utilities</div>
-                <table class="repo-table">
-                    <thead>
-                        <tr>
-                            <th>Repository</th>
-                            <th>Language</th>
-                            <th>Description</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><a href="https://github.com/renderprotocol/RPUtilsSwift"
-                                    target="_blank">RPUtilsSwift</a></td>
-                            <td>Swift</td>
-                            <td class="desc">Shared utility package — component factories, style resolvers, widget
-                                helpers, and action handlers for SwiftUI.</td>
-                            <td><span class="status status-active">🟢 Active</span></td>
-                        </tr>
-                        <tr>
-                            <td><a href="https://github.com/renderprotocol/rp_utils_dart"
-                                    target="_blank">rp_utils_dart</a></td>
-                            <td>Dart</td>
-                            <td class="desc">Shared utility package — component factories, style resolvers, widget
-                                helpers, and action handlers for Flutter &amp; server.</td>
-                            <td><span class="status status-active">🟢 Active</span></td>
-                        </tr>
-                        <tr>
-                            <td>rp-utils-kotlin</td>
-                            <td>Kotlin</td>
-                            <td class="desc">Shared utility package for Jetpack Compose — component factories, style
-                                resolvers, and action handlers.</td>
-                            <td><span class="status status-planned">🟠 Planned</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-scroll">
+                    <table class="repo-table">
+                        <thead>
+                            <tr>
+                                <th>Repository</th>
+                                <th>Language</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/renderprotocol/RPUtilsSwift"
+                                        target="_blank">RPUtilsSwift</a></td>
+                                <td>Swift</td>
+                                <td class="desc">Shared utility package — component factories, style resolvers, widget
+                                    helpers, and action handlers for SwiftUI.</td>
+                                <td><span class="status status-active">🟢 Active</span></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/renderprotocol/rp_utils_dart"
+                                        target="_blank">rp_utils_dart</a></td>
+                                <td>Dart</td>
+                                <td class="desc">Shared utility package — component factories, style resolvers, widget
+                                    helpers, and action handlers for Flutter &amp; server.</td>
+                                <td><span class="status status-active">🟢 Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>rp-utils-kotlin</td>
+                                <td>Kotlin</td>
+                                <td class="desc">Shared utility package for Jetpack Compose — component factories, style
+                                    resolvers, and action handlers.</td>
+                                <td><span class="status status-planned">🟠 Planned</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Backend & Services -->
             <div class="table-section">
                 <div class="table-section-title">🖥️ Backend &amp; Services</div>
-                <table class="repo-table">
-                    <thead>
-                        <tr>
-                            <th>Repository</th>
-                            <th>Stack</th>
-                            <th>Description</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><a href="https://github.com/renderprotocol/render_protocol_server"
-                                    target="_blank">render_protocol_server</a></td>
-                            <td>Dart (gRPC + Shelf) &amp; Swift (gRPC + Vapor)</td>
-                            <td class="desc">Backend reference implementation — gRPC &amp; REST APIs, middlewares, mock
-                                data, and Docker support. Houses internal services like
-                                <code>rp_database_service</code>, with more upcoming.</td>
-                            <td><span class="status status-progress">🟡 In Progress</span></td>
-                        </tr>
-                        <tr>
-                            <td><a href="https://github.com/renderprotocol/render-protocol-terminal"
-                                    target="_blank">render-protocol-terminal</a></td>
-                            <td>TBD</td>
-                            <td class="desc">Admin panel for managing and configuring server-driven UIs.</td>
-                            <td><span class="status status-not-started">🔴 Not Started</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-scroll">
+                    <table class="repo-table">
+                        <thead>
+                            <tr>
+                                <th>Repository</th>
+                                <th>Stack</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/renderprotocol/render_protocol_server"
+                                        target="_blank">render_protocol_server</a></td>
+                                <td>Dart (gRPC + Shelf) &amp; Swift (gRPC + Vapor)</td>
+                                <td class="desc">Backend reference implementation — gRPC &amp; REST APIs, middlewares,
+                                    mock data, and Docker support. Houses internal services like
+                                    <code>rp_database_service</code>, with more upcoming.
+                                </td>
+                                <td><span class="status status-progress">🟡 In Progress</span></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/renderprotocol/render-protocol-terminal"
+                                        target="_blank">render-protocol-terminal</a></td>
+                                <td>TBD</td>
+                                <td class="desc">Admin panel for managing and configuring server-driven UIs.</td>
+                                <td><span class="status status-not-started">🔴 Not Started</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
@@ -1336,6 +1524,17 @@ graph TD
         </section>
 
     </main>
+
+    <!-- Contributors -->
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+        <div class="contributors">
+            <span class="contributors-label">Built by</span>
+            <a href="https://github.com/k-arindam" target="_blank" class="contributor">
+                <img src="https://github.com/k-arindam.png?size=56" alt="k-arindam">
+                <span>k-arindam</span>
+            </a>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">
