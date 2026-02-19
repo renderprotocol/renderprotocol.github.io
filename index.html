@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Render Protocol — Server-Driven UI Framework</title>
+    <meta name="description"
+        content="An open-source, server-driven UI framework for SwiftUI, Flutter, and Jetpack Compose. Dynamic, schema-driven UIs powered by Protobuf and AI.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '13px',
+                primaryColor: '#00BFA5',
+                primaryTextColor: '#fff',
+                lineColor: '#5DF3E3',
+                secondaryColor: '#1a2332',
+                tertiaryColor: '#0d1a26'
+            }
+        });
+    </script>
+    <style>
+        :root {
+            --primary: #00BFA5;
+            --primary-light: #5DF3E3;
+            --primary-dark: #00897B;
+            --bg-deep: #0a0f1a;
+            --bg-card: #111827;
+            --bg-card-alt: #1a2332;
+            --bg-surface: #0d1420;
+            --text-primary: #f0f4f8;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: rgba(0, 191, 165, 0.12);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --glow: rgba(0, 191, 165, 0.15);
+            --glow-strong: rgba(0, 191, 165, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ─── Background Decoration ─── */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -40%;
+            left: -20%;
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(ellipse, rgba(0, 191, 165, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -30%;
+            right: -15%;
+            width: 60%;
+            height: 60%;
+            background: radial-gradient(ellipse, rgba(93, 243, 227, 0.04) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ─── Navigation ─── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(10, 15, 26, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+            transition: all 0.3s ease;
+        }
+
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.3rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 0.45rem 0.9rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-light);
+            background: rgba(0, 191, 165, 0.08);
+        }
+
+        .nav-cta {
+            background: var(--primary) !important;
+            color: var(--bg-deep) !important;
+            font-weight: 600 !important;
+        }
+
+        .nav-cta:hover {
+            background: var(--primary-light) !important;
+            color: var(--bg-deep) !important;
+        }
+
+        /* ─── Main Container ─── */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ─── Hero ─── */
+        .hero {
+            padding: 10rem 0 5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: rgba(0, 191, 165, 0.1);
+            border: 1px solid rgba(0, 191, 165, 0.2);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--primary-light);
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .hero-badge .pulse {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.5);
+            }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.8rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+            animation: fadeInUp 0.6s ease 0.1s backwards;
+        }
+
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light), #a8edea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            color: var(--text-secondary);
+            max-width: 680px;
+            margin: 0 auto 1.5rem;
+            line-height: 1.8;
+            animation: fadeInUp 0.6s ease 0.2s backwards;
+        }
+
+        .hero-notice {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.7rem 1.2rem;
+            background: rgba(255, 193, 7, 0.08);
+            border: 1px solid rgba(255, 193, 7, 0.15);
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: #ffc107;
+            animation: fadeInUp 0.6s ease 0.3s backwards;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2.5rem;
+            animation: fadeInUp 0.6s ease 0.35s backwards;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(0, 191, 165, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 191, 165, 0.35);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card-alt);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ─── Sections ─── */
+        .section {
+            padding: 5rem 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .section-divider {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            border-radius: 2px;
+            margin: 0 auto 2rem;
+        }
+
+        /* ─── Card Grid ─── */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 1.75rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover {
+            border-color: var(--border);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        /* ─── Principles (icon list) ─── */
+        .principles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .principle-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .principle-item:hover {
+            border-color: var(--border);
+            background: var(--bg-card-alt);
+        }
+
+        .principle-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 191, 165, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .principle-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .principle-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* ─── Architecture / Mermaid ─── */
+        .diagram-wrapper {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 2.5rem;
+            overflow-x: auto;
+        }
+
+        .diagram-wrapper .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+
+        .diagram-wrapper .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* ─── Tables ─── */
+        .table-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .table-section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .repo-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        .repo-table th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .repo-table td {
+            padding: 0.9rem 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+            vertical-align: top;
+        }
+
+        .repo-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .repo-table tr:hover td {
+            background: rgba(0, 191, 165, 0.03);
+        }
+
+        .repo-table a {
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .repo-table a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .repo-table .desc {
+            color: var(--text-secondary);
+        }
+
+        .repo-table code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            padding: 0.15rem 0.4rem;
+            background: rgba(0, 191, 165, 0.08);
+            border-radius: 5px;
+            color: var(--primary-light);
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.7rem;
+            border-radius: 100px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.12);
+            color: #34d399;
+        }
+
+        .status-progress {
+            background: rgba(251, 191, 36, 0.12);
+            color: #fbbf24;
+        }
+
+        .status-planned {
+            background: rgba(251, 146, 60, 0.12);
+            color: #fb923c;
+        }
+
+        .status-not-started {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+        }
+
+        .status-done {
+            background: rgba(16, 185, 129, 0.12);
+            color: #34d399;
+        }
+
+        /* ─── Roadmap ─── */
+        .roadmap {
+            position: relative;
+        }
+
+        .roadmap-phase {
+            position: relative;
+            padding-left: 2.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .roadmap-phase::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 30px;
+            bottom: -20px;
+            width: 2px;
+            background: var(--border-subtle);
+        }
+
+        .roadmap-phase:last-child::before {
+            display: none;
+        }
+
+        .roadmap-dot {
+            position: absolute;
+            left: 0;
+            top: 6px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .roadmap-dot.current {
+            background: var(--primary);
+            box-shadow: 0 0 16px var(--glow-strong);
+        }
+
+        .roadmap-dot.current::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        .roadmap-dot.future {
+            background: var(--bg-card-alt);
+            border: 2px solid var(--text-muted);
+        }
+
+        .roadmap-phase h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .roadmap-phase h3 .phase-tag {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--primary);
+            background: rgba(0, 191, 165, 0.1);
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .roadmap-items {
+            list-style: none;
+        }
+
+        .roadmap-items li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 0.35rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .roadmap-items li .ri {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* ─── AI Section ─── */
+        .ai-section {
+            background: linear-gradient(135deg, rgba(0, 191, 165, 0.05), rgba(93, 243, 227, 0.03));
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 3rem;
+        }
+
+        .ai-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .ai-features,
+        .ai-enables {
+            list-style: none;
+        }
+
+        .ai-features li,
+        .ai-enables li {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .ai-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* ─── Status Overview ─── */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .status-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s;
+        }
+
+        .status-card:hover {
+            border-color: var(--border);
+        }
+
+        .status-card .area {
+            font-size: 0.88rem;
+            font-weight: 500;
+        }
+
+        /* ─── Footer ─── */
+        .footer {
+            border-top: 1px solid var(--border-subtle);
+            padding: 3rem 0;
+            margin-top: 3rem;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-light);
+        }
+
+        .footer-tagline {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-license {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .footer-license a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 7rem 0 3rem;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .ai-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .diagram-wrapper {
+                padding: 1.25rem;
+            }
+
+            .ai-section {
+                padding: 2rem 1.5rem;
+            }
+
+            .status-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            main {
+                padding: 0 1rem;
+            }
+
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-inner">
+            <a href="#" class="nav-brand">
+                Render Protocol
+            </a>
+            <ul class="nav-links">
+                <li><a href="#vision">Vision</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#repos">Repositories</a></li>
+                <li><a href="#roadmap">Roadmap</a></li>
+                <li><a href="#status">Status</a></li>
+                <li><a href="https://github.com/renderprotocol" class="nav-cta" target="_blank">GitHub ↗</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-badge">
+                <span class="pulse"></span>
+                Early Foundation Phase
+            </div>
+            <h1>
+                <span class="gradient-text">Render Protocol</span>
+            </h1>
+            <p class="hero-subtitle">
+                An open-source, <strong>server-driven UI framework</strong> for modern mobile platforms — starting with
+                <strong>SwiftUI</strong> and <strong>Flutter</strong>, expanding to <strong>Jetpack Compose</strong>.
+                Enable dynamic, schema-driven UIs powered by backend configuration and AI — without sacrificing native
+                performance.
+            </p>
+            <div class="hero-notice">
+                🚧 Core schemas, architecture, client SDKs, and the backend server are being built out. Expect breaking
+                changes during v0.x.
+            </div>
+            <div class="hero-actions">
+                <a href="https://github.com/renderprotocol" class="btn btn-primary" target="_blank">
+                    View on GitHub
+                </a>
+                <a href="https://rpdocs.karindam.in" class="btn btn-secondary" target="_blank">
+                    Documentation (Upcoming)
+                </a>
+            </div>
+        </section>
+
+        <!-- Vision -->
+        <section class="section" id="vision">
+            <div class="section-header">
+                <h2>🎯 Vision</h2>
+                <div class="section-divider"></div>
+                <p>Build a platform-agnostic UI rendering protocol — not a web abstraction layer — that embraces native
+                    frameworks and performance.</p>
+            </div>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-icon">📋</div>
+                    <h3>Schema-Driven Rendering</h3>
+                    <p>Render native UI directly from Protobuf schema definitions across platforms.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🔄</div>
+                    <h3>Backend-Controlled Updates</h3>
+                    <p>Push UI changes from the server without requiring app redeployments.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🤖</div>
+                    <h3>AI-Compatible Schemas</h3>
+                    <p>LLMs can generate valid, renderable UI schemas that clients safely render.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🧩</div>
+                    <h3>Clean Separation</h3>
+                    <p>Strong boundaries between design, logic, and presentation layers.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">📱</div>
+                    <h3>Mobile-First</h3>
+                    <p>First-class support for mobile-only experiences across iOS and Android.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Core Principles -->
+        <section class="section" id="principles">
+            <div class="section-header">
+                <h2>🧠 Core Principles</h2>
+                <div class="section-divider"></div>
+            </div>
+            <div class="principles-grid">
+                <div class="principle-item">
+                    <div class="principle-icon">🖥️</div>
+                    <div>
+                        <div class="principle-text">Server-Driven, Native-Rendered</div>
+                    </div>
+                </div>
+                <div class="principle-item">
+                    <div class="principle-icon">📐</div>
+                    <div>
+                        <div class="principle-text">Schema First</div>
+                        <div class="principle-sub">Protobuf-defined, language-agnostic contracts</div>
+                    </div>
+                </div>
+                <div class="principle-item">
+                    <div class="principle-icon">📱</div>
+                    <div>
+                        <div class="principle-text">Mobile-Only Focus</div>
+                    </div>
+                </div>
+                <div class="principle-item">
+                    <div class="principle-icon">🤖</div>
+                    <div>
+                        <div class="principle-text">AI-Compatible UI Generation</div>
+                    </div>
+                </div>
+                <div class="principle-item">
+                    <div class="principle-icon">🌐</div>
+                    <div>
+                        <div class="principle-text">Open-Source &amp; Self-Hostable</div>
+                    </div>
+                </div>
+                <div class="principle-item">
+                    <div class="principle-icon">🔧</div>
+                    <div>
+                        <div class="principle-text">Extensible &amp; Incremental</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture & Data Flow -->
+        <section class="section" id="architecture">
+            <div class="section-header">
+                <h2>🔀 Architecture &amp; Data Flow</h2>
+                <div class="section-divider"></div>
+            </div>
+            <div class="diagram-wrapper">
+                <pre class="mermaid">
+graph TD
+    subgraph Spec ["📐 Specifications"]
+        Proto["render-protocol-spec&lt;br/&gt;(Protobuf Schemas)"]
+    end
+
+    subgraph CodeGen ["⚙️ Code Generation (Buf)"]
+        direction LR
+        GenSwift["RPGeneratedSwift"]
+        GenDart["rp_generated_dart"]
+        GenKotlin["rp-generated-kotlin&lt;br/&gt;(Planned)"]    
+    end
+
+    subgraph Utils ["🧰 Shared Utilities"]
+        direction LR
+        UtilSwift["RPUtilsSwift"]
+        UtilDart["rp_utils_dart"]
+        UtilKotlin["rp-utils-kotlin&lt;br/&gt;(Planned)"]
+    end
+
+    subgraph Server ["🖥️ Backend"]
+        ServerApp["render_protocol_server"]
+        DB["rp_database_service"]
+    end
+
+    subgraph Admin ["🛠️ Admin Panel"]
+        Terminal["render-protocol-terminal&lt;br/&gt;(Planned)"]
+    end
+
+    subgraph Clients ["📱 Client SDKs"]
+        direction LR
+        Swift["RenderProtocolSwift&lt;br/&gt;(SwiftUI)"]
+        Flutter["fl_render_protocol&lt;br/&gt;(Flutter)"]
+        Compose["render-protocol-compose&lt;br/&gt;(Compose — Planned)"]
+    end
+
+    Proto --> GenSwift
+    Proto --> GenDart
+    Proto --> GenKotlin
+
+    GenDart --> ServerApp
+    UtilDart --> ServerApp
+    ServerApp --> DB
+
+    GenDart --> Terminal
+    UtilDart --> Terminal
+    Terminal <-->|manages| ServerApp
+
+    GenSwift --> Swift
+    UtilSwift --> Swift
+    GenDart --> Flutter
+    UtilDart --> Flutter
+    GenKotlin --> Compose
+    UtilKotlin --> Compose
+
+    ServerApp <-->|gRPC| Swift
+    ServerApp <-->|gRPC| Flutter
+    ServerApp <-->|gRPC| Compose
+
+    style Spec fill:#4a90d9,stroke:#2c5f8a,color:#fff
+    style CodeGen fill:#6c5ce7,stroke:#4a3db0,color:#fff
+    style Utils fill:#00b894,stroke:#00806a,color:#fff
+    style Server fill:#e17055,stroke:#b34530,color:#fff
+    style Admin fill:#636e72,stroke:#2d3436,color:#fff
+    style Clients fill:#fd79a8,stroke:#c44d7b,color:#fff
+                </pre>
+            </div>
+        </section>
+
+        <!-- Repositories -->
+        <section class="section" id="repos">
+            <div class="section-header">
+                <h2>📦 Repositories</h2>
+                <div class="section-divider"></div>
+            </div>
+
+            <!-- Schema & Specifications -->
+            <div class="table-section">
+                <div class="table-section-title">📐 Schema &amp; Specifications</div>
+                <table class="repo-table">
+                    <thead>
+                        <tr>
+                            <th>Repository</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><a href="https://github.com/renderprotocol/render-protocol-spec"
+                                    target="_blank">render-protocol-spec</a></td>
+                            <td class="desc">Canonical Protobuf schemas — UI component definitions and gRPC API service
+                                contracts. Versioned (<code>v1</code>, <code>v2</code>) with Buf-managed code generation
+                                for Swift, Dart, Kotlin, C++, JS, and Python.</td>
+                            <td><span class="status status-active">🟢 Active</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Client SDKs -->
+            <div class="table-section">
+                <div class="table-section-title">🧩 Client SDKs</div>
+                <table class="repo-table">
+                    <thead>
+                        <tr>
+                            <th>Repository</th>
+                            <th>Platform</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><a href="https://github.com/renderprotocol/RenderProtocolSwift"
+                                    target="_blank">RenderProtocolSwift</a></td>
+                            <td>SwiftUI</td>
+                            <td class="desc">Native Swift SDK with modular architecture — includes schema rendering,
+                                networking (gRPC), caching, state management, and component registries. Ships with an
+                                example app.</td>
+                            <td><span class="status status-active">🟢 Active</span></td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://github.com/renderprotocol/fl_render_protocol"
+                                    target="_blank">fl_render_protocol</a></td>
+                            <td>Flutter</td>
+                            <td class="desc">Flutter SDK mirroring the Swift architecture — widget rendering,
+                                networking, caching, and component registries. Includes an example app.</td>
+                            <td><span class="status status-active">🟢 Active</span></td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://github.com/renderprotocol/render-protocol-compose"
+                                    target="_blank">render-protocol-compose</a></td>
+                            <td>Jetpack Compose</td>
+                            <td class="desc">Kotlin/Compose renderer for Android.</td>
+                            <td><span class="status status-not-started">🔴 Not Started</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Generated Code -->
+            <div class="table-section">
+                <div class="table-section-title">⚙️ Generated Code</div>
+                <table class="repo-table">
+                    <thead>
+                        <tr>
+                            <th>Repository</th>
+                            <th>Language</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><a href="https://github.com/renderprotocol/RPGeneratedSwift"
+                                    target="_blank">RPGeneratedSwift</a></td>
+                            <td>Swift</td>
+                            <td class="desc">Auto-generated Swift Protobuf &amp; gRPC stubs from
+                                <code>render-protocol-spec</code>. Consumed as a dependency by
+                                <code>RenderProtocolSwift</code>.</td>
+                            <td><span class="status status-active">🟢 Active</span></td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://github.com/renderprotocol/rp_generated_dart"
+                                    target="_blank">rp_generated_dart</a></td>
+                            <td>Dart</td>
+                            <td class="desc">Auto-generated Dart Protobuf &amp; gRPC stubs from
+                                <code>render-protocol-spec</code>. Consumed by <code>fl_render_protocol</code> and
+                                <code>render_protocol_server</code>.</td>
+                            <td><span class="status status-active">🟢 Active</span></td>
+                        </tr>
+                        <tr>
+                            <td>rp-generated-kotlin</td>
+                            <td>Kotlin</td>
+                            <td class="desc">Auto-generated Kotlin Protobuf &amp; gRPC stubs for
+                                <code>render-protocol-compose</code>.</td>
+                            <td><span class="status status-planned">🟠 Planned</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Shared Utilities -->
+            <div class="table-section">
+                <div class="table-section-title">🧰 Shared Utilities</div>
+                <table class="repo-table">
+                    <thead>
+                        <tr>
+                            <th>Repository</th>
+                            <th>Language</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><a href="https://github.com/renderprotocol/RPUtilsSwift"
+                                    target="_blank">RPUtilsSwift</a></td>
+                            <td>Swift</td>
+                            <td class="desc">Shared utility package — component factories, style resolvers, widget
+                                helpers, and action handlers for SwiftUI.</td>
+                            <td><span class="status status-active">🟢 Active</span></td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://github.com/renderprotocol/rp_utils_dart"
+                                    target="_blank">rp_utils_dart</a></td>
+                            <td>Dart</td>
+                            <td class="desc">Shared utility package — component factories, style resolvers, widget
+                                helpers, and action handlers for Flutter &amp; server.</td>
+                            <td><span class="status status-active">🟢 Active</span></td>
+                        </tr>
+                        <tr>
+                            <td>rp-utils-kotlin</td>
+                            <td>Kotlin</td>
+                            <td class="desc">Shared utility package for Jetpack Compose — component factories, style
+                                resolvers, and action handlers.</td>
+                            <td><span class="status status-planned">🟠 Planned</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Backend & Services -->
+            <div class="table-section">
+                <div class="table-section-title">🖥️ Backend &amp; Services</div>
+                <table class="repo-table">
+                    <thead>
+                        <tr>
+                            <th>Repository</th>
+                            <th>Stack</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><a href="https://github.com/renderprotocol/render_protocol_server"
+                                    target="_blank">render_protocol_server</a></td>
+                            <td>Dart (gRPC + Shelf) &amp; Swift (gRPC + Vapor)</td>
+                            <td class="desc">Backend reference implementation — gRPC &amp; REST APIs, middlewares, mock
+                                data, and Docker support. Houses internal services like
+                                <code>rp_database_service</code>, with more upcoming.</td>
+                            <td><span class="status status-progress">🟡 In Progress</span></td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://github.com/renderprotocol/render-protocol-terminal"
+                                    target="_blank">render-protocol-terminal</a></td>
+                            <td>TBD</td>
+                            <td class="desc">Admin panel for managing and configuring server-driven UIs.</td>
+                            <td><span class="status status-not-started">🔴 Not Started</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Roadmap -->
+        <section class="section" id="roadmap">
+            <div class="section-header">
+                <h2>🗺️ Roadmap</h2>
+                <div class="section-divider"></div>
+            </div>
+            <div class="roadmap">
+                <div class="roadmap-phase">
+                    <div class="roadmap-dot current"></div>
+                    <h3>Phase 1 — Foundations <span class="phase-tag">Current</span></h3>
+                    <ul class="roadmap-items">
+                        <li><span class="ri">✅</span> Define platform-generic UI schema in Protobuf (14 components, 4
+                            API services)</li>
+                        <li><span class="ri">✅</span> Set up Buf-managed code generation pipeline</li>
+                        <li><span class="ri">✅</span> Client-side renderers for SwiftUI &amp; Flutter</li>
+                        <li><span class="ri">✅</span> Component registries and factory pattern</li>
+                        <li><span class="ri">🔧</span> Networking, caching, and schema validation</li>
+                        <li><span class="ri">🔧</span> Authentication handshake flow</li>
+                    </ul>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="roadmap-dot future"></div>
+                    <h3>Phase 2 — AI &amp; Tooling</h3>
+                    <ul class="roadmap-items">
+                        <li><span class="ri">○</span> LLM-friendly schema definitions</li>
+                        <li><span class="ri">○</span> UI generation during user interaction</li>
+                        <li><span class="ri">○</span> Schema introspection &amp; validation tools</li>
+                        <li><span class="ri">○</span> Drag-and-drop UI builder (backend-driven)</li>
+                    </ul>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="roadmap-dot future"></div>
+                    <h3>Phase 3 — Ecosystem</h3>
+                    <ul class="roadmap-items">
+                        <li><span class="ri">○</span> Jetpack Compose parity</li>
+                        <li><span class="ri">○</span> Admin panel for UI management</li>
+                        <li><span class="ri">○</span> Performance instrumentation</li>
+                        <li><span class="ri">○</span> Advanced state &amp; event handling</li>
+                        <li><span class="ri">○</span> Terminal/CLI tooling</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI-First Thinking -->
+        <section class="section" id="ai">
+            <div class="ai-section">
+                <div class="section-header" style="margin-bottom: 1.5rem;">
+                    <h2>🤖 AI-First Thinking</h2>
+                    <div class="section-divider"></div>
+                </div>
+                <div class="ai-grid">
+                    <div>
+                        <div class="ai-label">Designed so that</div>
+                        <ul class="ai-features">
+                            <li><span>🔍</span> An LLM can <strong>reason about supported UI components</strong></li>
+                            <li><span>💬</span> Generated responses can return <strong>UI instead of text</strong></li>
+                            <li><span>🛡️</span> Client SDKs can safely render AI-generated layouts</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="ai-label">This enables</div>
+                        <ul class="ai-enables">
+                            <li><span>💭</span> Conversational UIs</li>
+                            <li><span>🎛️</span> Adaptive screens</li>
+                            <li><span>📍</span> Context-aware layouts</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Project Status -->
+        <section class="section" id="status">
+            <div class="section-header">
+                <h2>🌱 Project Status</h2>
+                <div class="section-divider"></div>
+            </div>
+            <div class="status-grid">
+                <div class="status-card">
+                    <span class="area">Protobuf Schemas</span>
+                    <span class="status status-done">✅ v1 Defined</span>
+                </div>
+                <div class="status-card">
+                    <span class="area">Code Generation</span>
+                    <span class="status status-done">✅ Buf Pipeline</span>
+                </div>
+                <div class="status-card">
+                    <span class="area">SwiftUI SDK</span>
+                    <span class="status status-active">🟢 Active</span>
+                </div>
+                <div class="status-card">
+                    <span class="area">Flutter SDK</span>
+                    <span class="status status-active">🟢 Active</span>
+                </div>
+                <div class="status-card">
+                    <span class="area">Compose SDK</span>
+                    <span class="status status-not-started">🔴 Not Started</span>
+                </div>
+                <div class="status-card">
+                    <span class="area">Backend Server</span>
+                    <span class="status status-progress">🟡 In Progress</span>
+                </div>
+                <div class="status-card">
+                    <span class="area">Database Service</span>
+                    <span class="status status-progress">🟡 In Progress</span>
+                </div>
+                <div class="status-card">
+                    <span class="area">Admin Panel</span>
+                    <span class="status status-not-started">🔴 Not Started</span>
+                </div>
+                <div class="status-card">
+                    <span class="area">CLI Tooling</span>
+                    <span class="status status-not-started">🔴 Not Started</span>
+                </div>
+            </div>
+            <div
+                style="margin-top: 2rem; padding: 1rem 1.5rem; background: rgba(255, 193, 7, 0.06); border: 1px solid rgba(255, 193, 7, 0.12); border-radius: 12px; font-size: 0.88rem; color: var(--text-secondary);">
+                APIs and folder structures are evolving — expect breaking changes during v0.x. Contributions &amp;
+                discussions welcome once foundations settle.
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+            <div class="footer-links">
+                <a href="https://github.com/renderprotocol" target="_blank">
+                    <span>GitHub Org</span>
+                </a>
+                <a href="https://rpdocs.karindam.in" target="_blank">
+                    <span>Documentation (Upcoming)</span>
+                </a>
+            </div>
+            <div class="footer-tagline">Render once. Control everywhere.</div>
+            <div class="footer-license">
+                Licensed under the <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>. Open,
+                extensible, and community-friendly.
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>
